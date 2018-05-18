@@ -15,6 +15,7 @@
  */
 
 import {
+    AutomationContextAware,
     Configuration,
     EventFired,
     HandlerContext,
@@ -27,6 +28,7 @@ import {
     EventIncoming,
 } from "@atomist/automation-client/internal/transport/RequestProcessor";
 import * as nsp from "@atomist/automation-client/internal/util/cls";
+import { AutomationContext } from "@atomist/automation-client/internal/util/cls";
 import {
     AutomationEventListener,
     AutomationEventListenerSupport,
@@ -58,20 +60,20 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
     }
 
     public commandIncoming(payload: CommandIncoming) {
-        this.sendEvent("Incoming command", "request", payload);
+        this.sendEvent("Incoming command", "request", payload, nsp.get());
     }
 
     public commandStarting(payload: CommandInvocation,
                            ctx: HandlerContext) {
         this.sendOperation("CommandHandler", "operation", "command-handler",
-            payload.name, "starting");
+            payload.name, "starting", (ctx as any as AutomationContextAware).context);
     }
 
     public commandSuccessful(payload: CommandInvocation,
                              ctx: HandlerContext,
                              result: HandlerResult): Promise<any> {
         this.sendOperation("CommandHandler", "operation", "command-handler",
-            payload.name, "successful", result);
+            payload.name, "successful", (ctx as any as AutomationContextAware).context, result);
         return Promise.resolve();
     }
 
@@ -79,43 +81,49 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
                          ctx: HandlerContext,
                          err: any): Promise<any> {
         this.sendOperation("CommandHandler", "operation", "command-handler",
-            payload.name, "failed", err);
+            payload.name, "failed", (ctx as any as AutomationContextAware).context, err);
         return Promise.resolve();
     }
 
     public eventIncoming(payload: EventIncoming) {
-        this.sendEvent("Incoming event", "event", payload);
+        this.sendEvent("Incoming event", "event", payload, nsp.get());
     }
 
     public eventStarting(payload: EventFired<any>,
                          ctx: HandlerContext) {
         this.sendOperation("EventHandler", "operation", "event-handler",
-            payload.extensions.operationName, "starting");
+            payload.extensions.operationName, "starting", (ctx as any as AutomationContextAware).context);
     }
 
     public eventSuccessful(payload: EventFired<any>,
                            ctx: HandlerContext,
                            result: HandlerResult[]): Promise<any> {
         this.sendOperation("EventHandler", "operation", "event-handler",
-            payload.extensions.operationName, "successful", result);
+            payload.extensions.operationName, "successful", (ctx as any as AutomationContextAware).context, result);
         return Promise.resolve();
     }
 
     public eventFailed(payload: EventFired<any>,
-                       ctx: HandlerContext, err: any): Promise<any> {
+                       ctx: HandlerContext,
+                       err: any): Promise<any> {
         this.sendOperation("EventHandler", "operation", "event-handler",
-            payload.extensions.operationName, "failed", err);
+            payload.extensions.operationName, "failed", (ctx as any as AutomationContextAware).context, err);
         return Promise.resolve();
     }
 
     public messageSent(message: any,
                        destinations: Destination | Destination[],
-                       options: MessageOptions, ctx: HandlerContext) {
-        this.sendEvent("Outgoing message", "message", {
-            message,
-            destinations,
-            options,
-        });
+                       options: MessageOptions,
+                       ctx: HandlerContext) {
+        this.sendEvent(
+            "Outgoing message",
+            "message",
+            {
+                message,
+                destinations,
+                options,
+            },
+            (ctx as any as AutomationContextAware).context);
     }
 
     private sendOperation(identifier: string,
@@ -123,22 +131,26 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
                           type: string,
                           name: string,
                           status: string,
+                          ctx: AutomationContext,
                           err?: any) {
-        const start = nsp.get().ts;
+        if (!ctx) {
+            return;
+        }
+        const start = ctx.ts;
         const data: any = {
             "operation-type": type,
             "operation-name": name,
-            "artifact": nsp.get().name,
-            "version": nsp.get().version,
-            "team-id": nsp.get().teamId,
-            "team-name": nsp.get().teamName,
+            "artifact": ctx.name,
+            "version": ctx.version,
+            "team-id": ctx.teamId,
+            "team-name": ctx.teamName,
             "event-type": eventType,
             "level": status === "failed" ? "error" : "info",
             status,
             "execution-time": Date.now() - start,
-            "correlation-id": nsp.get().correlationId,
-            "invocation-id": nsp.get().invocationId,
-            "message": `${identifier} ${name} invocation ${status} for ${nsp.get().teamName} '${nsp.get().teamId}'`,
+            "correlation-id": ctx.correlationId,
+            "invocation-id": ctx.invocationId,
+            "message": `${identifier} ${name} invocation ${status} for ${ctx.teamName} '${ctx.teamId}'`,
         };
         if (err) {
             if (status === "failed") {
@@ -154,18 +166,22 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
 
     private sendEvent(identifier: string,
                       type: string,
-                      payload: any) {
+                      payload: any,
+                      ctx: AutomationContext) {
+        if (!ctx) {
+            return;
+        }
         const data = {
-            "operation-name": nsp.get().operation,
-            "artifact": nsp.get().name,
-            "version": nsp.get().version,
-            "team-id": nsp.get().teamId,
-            "team-name": nsp.get().teamName,
+            "operation-name": ctx.operation,
+            "artifact": ctx.name,
+            "version": ctx.version,
+            "team-id": ctx.teamId,
+            "team-name": ctx.teamName,
             "event-type": type,
             "level": "info",
-            "correlation-id": nsp.get().correlationId,
-            "invocation-id": nsp.get().invocationId,
-            "message": `${identifier} of ${nsp.get().operation} for ${nsp.get().teamName} '${nsp.get().teamId}'`,
+            "correlation-id": ctx.correlationId,
+            "invocation-id": ctx.invocationId,
+            "message": `${identifier} of ${ctx.operation} for ${ctx.teamName} '${ctx.teamId}'`,
             "payload": JSON.stringify(payload),
         };
         if (this.logzio) {
