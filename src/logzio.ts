@@ -264,7 +264,7 @@ export function configureLogzio(configuration: Configuration): Promise<Configura
         }
 
         const options: LogzioOptions = {
-            token: configuration.custom.logzio.token,
+            token: configuration.logzio.token,
             name: configuration.name,
             version: configuration.version,
             environment: configuration.environment,
