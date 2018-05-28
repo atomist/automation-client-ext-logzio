@@ -20,7 +20,6 @@ import {
     EventFired,
     HandlerContext,
     HandlerResult,
-    logger,
 } from "@atomist/automation-client";
 import { CommandInvocation } from "@atomist/automation-client/internal/invoker/Payload";
 import {
@@ -250,7 +249,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
         };
 
         // create the winston logging adapter
-        (logger as any).add(logzioWinstonTransport, logzioOptions);
+        (global as any)__logger.add(logzioWinstonTransport, logzioOptions);
 
     }
 }
@@ -260,7 +259,6 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
  */
 export function configureLogzio(configuration: Configuration): Promise<Configuration> {
     if (_.get(configuration, "logzio.enabled") === true) {
-        logger.debug(`Adding Logz.io listener`);
 
         const token = _.get(configuration, "logzio.token");
         if (!token) {
