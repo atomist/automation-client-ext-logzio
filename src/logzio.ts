@@ -249,7 +249,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
         };
 
         // create the winston logging adapter
-        (global as any)__logger.add(logzioWinstonTransport, logzioOptions);
+        (global as any).__logger.add(logzioWinstonTransport, logzioOptions);
 
     }
 }
