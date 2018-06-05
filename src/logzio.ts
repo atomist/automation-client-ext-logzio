@@ -70,7 +70,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
 
     public commandSuccessful(payload: CommandInvocation,
                              ctx: HandlerContext,
-                             result: HandlerResult): Promise<any> {
+                             result: HandlerResult): Promise<void> {
         this.sendOperation("CommandHandler", "operation", "command-handler",
             payload.name, "successful", (ctx as any as AutomationContextAware).context, result);
         return Promise.resolve();
@@ -78,7 +78,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
 
     public commandFailed(payload: CommandInvocation,
                          ctx: HandlerContext,
-                         err: any): Promise<any> {
+                         err: any): Promise<void> {
         this.sendOperation("CommandHandler", "operation", "command-handler",
             payload.name, "failed", (ctx as any as AutomationContextAware).context, err);
         return Promise.resolve();
@@ -96,7 +96,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
 
     public eventSuccessful(payload: EventFired<any>,
                            ctx: HandlerContext,
-                           result: HandlerResult[]): Promise<any> {
+                           result: HandlerResult[]): Promise<void> {
         this.sendOperation("EventHandler", "operation", "event-handler",
             payload.extensions.operationName, "successful", (ctx as any as AutomationContextAware).context, result);
         return Promise.resolve();
@@ -104,7 +104,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
 
     public eventFailed(payload: EventFired<any>,
                        ctx: HandlerContext,
-                       err: any): Promise<any> {
+                       err: any): Promise<void> {
         this.sendOperation("EventHandler", "operation", "event-handler",
             payload.extensions.operationName, "failed", (ctx as any as AutomationContextAware).context, err);
         return Promise.resolve();
@@ -113,7 +113,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
     public messageSent(message: any,
                        destinations: Destination | Destination[],
                        options: MessageOptions,
-                       ctx: HandlerContext) {
+                       ctx: HandlerContext): Promise<void> {
         this.sendEvent(
             "Outgoing message",
             "message",
@@ -123,6 +123,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
                 options,
             },
             (ctx as any as AutomationContextAware).context);
+        return Promise.resolve();
     }
 
     private sendOperation(identifier: string,
