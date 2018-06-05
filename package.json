@@ -17,7 +17,7 @@
     "url": "https://github.com/atomist/automation-client-ext-logzio/issues"
   },
   "dependencies": {
-    "@atomist/automation-client": "https://r.atomist.com/rJErv0hKyX",
+    "@atomist/automation-client": "0.17.2-20180605032022",
     "app-root-path": "^2.0.1",
     "logzio-nodejs": "^0.4.10",
     "serialize-error": "^2.1.0",
