@@ -156,7 +156,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
             if (status === "failed") {
                 data.stacktrace = serializeError(err);
             } else if (status === "successful") {
-                data.result = serializeError(err);
+                data.result = JSON.stringify(err);
             }
         }
         if (this.logzio) {
