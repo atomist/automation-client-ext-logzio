@@ -1,1 +1,0 @@
-export { configureLogzio } from "./logzio";
