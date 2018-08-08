@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.1.2](https://github.com/atomist/automation-client-ext-logzio/compare/0.1.1...0.1.2) - 2018-08-08
 
+### Changed
+
+-   Move types of dependencies to dependencies.
+
 ## [0.1.1](https://github.com/atomist/automation-client-ext-logzio/compare/0.1.0...0.1.1) - 2018-08-03
 
 ### Fixed
