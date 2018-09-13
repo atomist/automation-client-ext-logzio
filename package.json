@@ -29,16 +29,18 @@
     "@types/lodash": "^4.14.116",
     "@types/serialize-error": "^2.1.0",
     "app-root-path": "^2.0.1",
+    "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.10",
     "logzio-nodejs": "^0.4.10",
     "serialize-error": "^2.1.0",
-    "winston-logzio": "^1.0.7"
+    "winston": "^3.1.0",
+    "winston-transport": "^4.2.0"
   },
   "peerDependencies": {
     "@atomist/automation-client": "*"
   },
   "devDependencies": {
-    "@atomist/automation-client": "1.0.0-M.3",
+    "@atomist/automation-client": "1.0.0-master.20180913071451",
     "@types/mocha": "^5.2.5",
     "@types/node": "^9.4.1",
     "@types/power-assert": "^1.4.29",

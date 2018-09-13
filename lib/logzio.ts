@@ -36,9 +36,13 @@ import {
     Destination,
     MessageOptions,
 } from "@atomist/automation-client/spi/message/MessageClient";
+import * as stringify from "json-stringify-safe";
 import * as _ from "lodash";
 import * as os from "os";
 import * as serializeError from "serialize-error";
+import * as TransportStream from "winston-transport";
+
+// tslint:disable:max-classes-per-file
 
 export interface LogzioOptions {
     token: string;
@@ -51,11 +55,8 @@ export interface LogzioOptions {
 export class LogzioAutomationEventListener extends AutomationEventListenerSupport
     implements AutomationEventListener {
 
-    private logzio: any;
-
-    constructor(options: LogzioOptions) {
+    constructor(private readonly logzio: any) {
         super();
-        this.initLogzioLogging(options);
     }
 
     public commandIncoming(payload: CommandIncoming) {
@@ -192,79 +193,12 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
             this.logzio.log(data);
         }
     }
-
-    private initLogzioLogging(options: LogzioOptions) {
-
-        const logzioOptions = {
-            token: options.token,
-            level: "debug",
-            type: "automation-client",
-            protocol: "https",
-            bufferSize: 10,
-            extraFields: {
-                "service": options.name,
-                "artifact": options.name,
-                "version": options.version,
-                "environment": options.environment,
-                "application-id": options.application,
-                "process-id": process.pid,
-                "host": os.hostname(),
-            },
-        };
-        // create the logzio event logger
-        this.logzio = require("logzio-nodejs").createLogger(logzioOptions);
-
-        const logzioWinstonTransport = require("winston-logzio");
-
-        // tslint:disable:no-parameter-reassignment
-        logzioWinstonTransport.prototype.log = function(level: any, msg: any, meta: any, callback: any) {
-
-            if (typeof msg !== "string" && typeof msg !== "object") {
-                msg = { message: this.safeToString(msg) };
-            } else if (typeof msg === "string") {
-                msg = { message: msg };
-            }
-
-            if (meta instanceof Error) {
-                meta = { error: meta.stack || meta.toString() };
-            }
-
-            if (nsp && nsp.get()) {
-                _.assign(msg, {
-                    level,
-                    "meta": meta,
-                    "operation-name": nsp.get().operation,
-                    "artifact": nsp.get().name,
-                    "version": nsp.get().version,
-                    "team-id": nsp.get().workspaceId,
-                    "team-name": nsp.get().workspaceName,
-                    "workspace-id": nsp.get().workspaceId,
-                    "workspace-name": nsp.get().workspaceName,
-                    "correlation-id": nsp.get().correlationId,
-                    "invocation-id": nsp.get().invocationId,
-                });
-            } else {
-                _.assign(msg, {
-                    level,
-                    meta,
-                });
-            }
-
-            this.logzioLogger.log(msg);
-
-            callback(null, true);
-        };
-
-        // create the winston logging adapter
-        (global as any).__logger.add(logzioWinstonTransport, logzioOptions);
-
-    }
 }
 
 /**
  * Configure logzio logging if token exists in configuration.
  */
-export function configureLogzio(configuration: Configuration): Promise<Configuration> {
+export async function configureLogzio(configuration: Configuration): Promise<Configuration> {
     if (_.get(configuration, "logzio.enabled") === true) {
 
         const token = _.get(configuration, "logzio.token");
@@ -278,21 +212,76 @@ export function configureLogzio(configuration: Configuration): Promise<Configura
             throw new Error("Logz.io can't be loaded. Please install with 'npm install logzio-nodejs --save'.");
         }
 
-        try {
-            require("winston-logzio");
-        } catch (err) {
-            throw new Error("Logz.io can't be loaded. Please install with 'npm install winston-logzio --save'.");
-        }
-
-        const options: LogzioOptions = {
+        const options = {
             token: configuration.logzio.token,
-            name: configuration.name,
-            version: configuration.version,
-            environment: configuration.environment,
-            application: configuration.application,
+            level: "debug",
+            type: "automation-client",
+            protocol: "https",
+            bufferSize: 10,
+            extraFields: {
+                "service": configuration.name,
+                "artifact": configuration.name,
+                "version": configuration.version,
+                "environment": configuration.environment,
+                "application-id": configuration.application,
+                "process-id": process.pid,
+                "host": os.hostname(),
+            },
         };
 
-        configuration.listeners.push(new LogzioAutomationEventListener(options));
+        const logzio = require("logzio-nodejs").createLogger(options);
+        configuration.listeners.push(new LogzioAutomationEventListener(logzio));
+
+        _.update(configuration, "logging.custom.transports",
+            old => !!old ? old : []);
+        configuration.logging.custom.transports.push(new Logzio(logzio));
     }
-    return Promise.resolve(configuration);
+    return configuration;
+}
+
+class Logzio extends TransportStream {
+
+    private readonly logzio: any;
+
+    constructor(opts: any) {
+        super(opts);
+        this.logzio = opts.logzio;
+
+    }
+
+    public log(info: any, mext: any) {
+        setImmediate(() => {
+            let msg = info.message;
+            const level = info.level;
+
+            if (typeof msg !== "string" && typeof msg !== "object") {
+                msg = { message: stringify(msg) };
+            } else if (typeof msg === "string") {
+                msg = { message: msg };
+            }
+
+            if (nsp && nsp.get()) {
+                _.assign(msg, {
+                    level,
+                    "operation-name": nsp.get().operation,
+                    "artifact": nsp.get().name,
+                    "version": nsp.get().version,
+                    "team-id": nsp.get().workspaceId,
+                    "team-name": nsp.get().workspaceName,
+                    "workspace-id": nsp.get().workspaceId,
+                    "workspace-name": nsp.get().workspaceName,
+                    "correlation-id": nsp.get().correlationId,
+                    "invocation-id": nsp.get().invocationId,
+                });
+            } else {
+                _.assign(msg, {
+                    level,
+                });
+            }
+
+            this.logzio.log(msg);
+        });
+
+        mext();
+    }
 }
