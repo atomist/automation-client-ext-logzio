@@ -234,7 +234,7 @@ export async function configureLogzio(configuration: Configuration): Promise<Con
 
         _.update(configuration, "logging.custom.transports",
             old => !!old ? old : []);
-        configuration.logging.custom.transports.push(new Logzio(logzio));
+        configuration.logging.custom.transports.push(new Logzio({ logzio }));
     }
     return configuration;
 }
