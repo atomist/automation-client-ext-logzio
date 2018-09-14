@@ -279,4 +279,3 @@ class Logzio extends TransportStream {
         mext();
     }
 }
-
