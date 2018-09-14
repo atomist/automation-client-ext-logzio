@@ -15,27 +15,21 @@
  */
 
 import {
+    AutomationContext,
     AutomationContextAware,
-    Configuration,
-    EventFired,
-    HandlerContext,
-    HandlerResult,
-} from "@atomist/automation-client";
-import { CommandInvocation } from "@atomist/automation-client/internal/invoker/Payload";
-import {
-    CommandIncoming,
-    EventIncoming,
-} from "@atomist/automation-client/internal/transport/RequestProcessor";
-import * as nsp from "@atomist/automation-client/internal/util/cls";
-import { AutomationContext } from "@atomist/automation-client/internal/util/cls";
-import {
     AutomationEventListener,
     AutomationEventListenerSupport,
-} from "@atomist/automation-client/server/AutomationEventListener";
-import {
+    CommandIncoming,
+    CommandInvocation,
+    Configuration,
     Destination,
+    EventFired,
+    EventIncoming,
+    HandlerContext,
+    HandlerResult,
     MessageOptions,
-} from "@atomist/automation-client/spi/message/MessageClient";
+    nsp,
+} from "@atomist/automation-client";
 import * as stringify from "json-stringify-safe";
 import * as _ from "lodash";
 import * as os from "os";

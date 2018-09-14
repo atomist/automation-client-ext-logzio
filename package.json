@@ -40,7 +40,7 @@
     "@atomist/automation-client": "*"
   },
   "devDependencies": {
-    "@atomist/automation-client": "1.0.0-master.20180913093131",
+    "@atomist/automation-client": "1.0.0-master.20180914115718",
     "@types/mocha": "^5.2.5",
     "@types/node": "^9.4.1",
     "@types/power-assert": "^1.4.29",
@@ -53,8 +53,7 @@
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "typedoc": "^0.11.1",
-    "typescript": "^2.9.2",
-    "typescript-formatter": "^7.2.2"
+    "typescript": "^2.9.2"
   },
   "directories": {
     "test": "test"
@@ -70,7 +69,6 @@
     "compile": "npm-run-all compile:ts",
     "compile:ts": "tsc --project .",
     "doc": "typedoc --mode modules --ignoreCompilerErrors --exclude \"**/*.d.ts\" --out doc index.ts lib",
-    "fmt": "tsfmt --replace",
     "lint": "tslint --format verbose --project . --exclude \"{build,node_modules}/**\" --exclude \"**/*.d.ts\" \"**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "test": "mocha --require espower-typescript/guess \"test/**/*.test.ts\"",
