@@ -15,7 +15,6 @@
  */
 
 import {
-    AutomationContext,
     AutomationContextAware,
     AutomationEventListener,
     AutomationEventListenerSupport,
@@ -28,8 +27,8 @@ import {
     HandlerContext,
     HandlerResult,
     MessageOptions,
-    nsp,
 } from "@atomist/automation-client";
+import * as nsp from "@atomist/automation-client/lib/internal/util/cls";
 import * as stringify from "json-stringify-safe";
 import * as _ from "lodash";
 import * as os from "os";
@@ -126,7 +125,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
                           type: string,
                           name: string,
                           status: string,
-                          ctx: AutomationContext,
+                          ctx: nsp.AutomationContext,
                           err?: any) {
         if (!ctx) {
             return;
@@ -164,7 +163,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
     private sendEvent(identifier: string,
                       type: string,
                       payload: any,
-                      ctx: AutomationContext) {
+                      ctx: nsp.AutomationContext) {
         if (!ctx) {
             return;
         }
