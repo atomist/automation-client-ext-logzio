@@ -40,7 +40,7 @@
     "@atomist/automation-client": "*"
   },
   "devDependencies": {
-    "@atomist/automation-client": "1.0.0-master.20181010081045",
+    "@atomist/automation-client": "1.0.0-RC.1",
     "@types/mocha": "^5.2.5",
     "@types/node": "^9.4.1",
     "@types/power-assert": "^1.4.29",
