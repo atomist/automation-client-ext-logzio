@@ -33,6 +33,7 @@ import * as stringify from "json-stringify-safe";
 import * as _ from "lodash";
 import * as os from "os";
 import * as serializeError from "serialize-error";
+import * as winston from "winston";
 import * as TransportStream from "winston-transport";
 
 // tslint:disable:max-classes-per-file
@@ -239,7 +240,10 @@ class Logzio extends TransportStream {
     constructor(opts: any) {
         super(opts);
         this.logzio = opts.logzio;
-
+        this.format = winston.format.combine(
+            winston.format.splat(),
+            winston.format.printf(info => info.message),
+        );
     }
 
     public log(info: any, mext: any) {
