@@ -1,6 +1,6 @@
 {
   "name": "@atomist/automation-client-ext-logzio",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Extension for sending logs to Logz.io in automation clients",
   "author": {
     "name": "Atomist",
