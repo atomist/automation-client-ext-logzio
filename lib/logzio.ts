@@ -53,12 +53,12 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
         super();
     }
 
-    public commandIncoming(payload: CommandIncoming) {
+    public commandIncoming(payload: CommandIncoming): void {
         this.sendEvent("Incoming command", "request", payload, nsp.get());
     }
 
     public commandStarting(payload: CommandInvocation,
-                           ctx: HandlerContext) {
+                           ctx: HandlerContext): void {
         this.sendOperation("CommandHandler", "operation", "command-handler",
             payload.name, "starting", (ctx as any as AutomationContextAware).context);
     }
@@ -79,12 +79,12 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
         return Promise.resolve();
     }
 
-    public eventIncoming(payload: EventIncoming) {
+    public eventIncoming(payload: EventIncoming): void {
         this.sendEvent("Incoming event", "event", payload, nsp.get());
     }
 
     public eventStarting(payload: EventFired<any>,
-                         ctx: HandlerContext) {
+                         ctx: HandlerContext): void {
         this.sendOperation("EventHandler", "operation", "event-handler",
             payload.extensions.operationName, "starting", (ctx as any as AutomationContextAware).context);
     }
@@ -127,7 +127,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
                           name: string,
                           status: string,
                           ctx: nsp.AutomationContext,
-                          err?: any) {
+                          err?: any): void {
         if (!ctx) {
             return;
         }
@@ -164,7 +164,7 @@ export class LogzioAutomationEventListener extends AutomationEventListenerSuppor
     private sendEvent(identifier: string,
                       type: string,
                       payload: any,
-                      ctx: nsp.AutomationContext) {
+                      ctx: nsp.AutomationContext): void {
         if (!ctx) {
             return;
         }
@@ -246,7 +246,7 @@ class Logzio extends TransportStream {
         );
     }
 
-    public log(info: any, mext: any) {
+    public log(info: any, mext: any): void {
         setImmediate(() => {
             let msg = info.message;
             const level = info.level;
